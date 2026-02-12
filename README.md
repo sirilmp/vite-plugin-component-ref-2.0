@@ -4,12 +4,12 @@ A powerful Vite plugin that automatically tags React components with source refe
 
 ## Features
 
-- 🎯 **Automatic Tagging**: Injects `ref-id`, `ref-component`, `ref-line`, etc., into your JSX elements.
-- ⚡ **Click-to-Open**: Press `Alt + Click` in the browser to instantly open the source file in your editor at the exact line.
-- 🤖 **Smart Editor Defaults**: Built-in support for `antigravity`, `cursor`, and `vscode` (no manual configuration needed).
-- 🛠️ **Flexible Configuration**: Full control over what attributes to inject and which files to include/exclude.
-- 👥 **Team Friendly**: Environment variable overrides allow each developer to use their preferred editor.
-- 🛡️ **Production Safe**: Automatically disables itself in production builds to keep your bundle clean.
+- **Automatic Tagging**: Injects `ref-id`, `ref-component`, `ref-line`, etc., into your JSX elements.
+- **Click-to-Open**: Press `Alt + Click` in the browser to instantly open the source file in your editor at the exact line.
+- **Smart Editor Defaults**: Built-in support for `antigravity`, `cursor`, and `vscode` (no manual configuration needed).
+- **Flexible Configuration**: Full control over what attributes to inject and which files to include/exclude.
+- **Team Friendly**: Environment variable overrides allow each developer to use their preferred editor.
+- **Production Safe**: Automatically disables itself in production builds to keep your bundle clean.
 
 ## Installation
 
@@ -63,10 +63,10 @@ componentRefTagger({
 ```
 
 ### Team Collaboration (Environment Overrides)
-Developers can override the project-wide editor setting by adding a variable to their `.env.local`:
+Developers can override the project-wide editor setting by adding a variable to their `.env.local` or `.env`:
 
 ```bash
-# .env.local
+# .env.local or .env
 COMPONENT_REF_EDITOR=cursor
 ```
 
@@ -82,4 +82,4 @@ componentRefTagger({
 
 ## License
 
-MIT © [Antigravity User]
+MIT © SIRILMP
