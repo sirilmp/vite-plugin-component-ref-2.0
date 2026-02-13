@@ -2,6 +2,9 @@
 
 A powerful Vite plugin that automatically tags React components with source reference attributes. This enables a seamless **"Alt + Click"** experience to jump from your browser directly to the corresponding line in your IDE.
 
+**Documentation**: [https://vpcr.vercel.app](https://vpcr.vercel.app)  
+**Changelog**: [https://vpcr.vercel.app/changelog](https://vpcr.vercel.app/changelog)
+
 ## Features
 
 - **Automatic Tagging**: Injects `ref-id`, `ref-component`, `ref-line`, etc., into your JSX elements.

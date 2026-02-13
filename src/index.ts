@@ -79,6 +79,7 @@ export function componentRefTagger(options: PluginOptions = {}): Plugin {
     name: "vite-plugin-component-ref",
     enforce: "pre",
 
+    apply: "serve", // Ensure plugin only runs during dev
     configResolved(resolvedConfig) {
       config = resolvedConfig;
       const env = loadEnv(config.mode, config.root, "");
@@ -142,7 +143,7 @@ export function componentRefTagger(options: PluginOptions = {}): Plugin {
     },
 
     transformIndexHtml(html) {
-      if (config.command === "build" || !enabled) return html;
+      if (!enabled) return html;
       return [
         {
           tag: "script",
@@ -153,7 +154,7 @@ export function componentRefTagger(options: PluginOptions = {}): Plugin {
     },
 
     transform(code, id) {
-      if (config.command === "build" || !enabled) return null;
+      if (!enabled) return null;
 
       const cleanId = id.split("?")[0];
       const normalizedId = cleanId.replace(/\\/g, "/");
