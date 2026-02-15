@@ -1,6 +1,6 @@
 {
   "name": "vpcr",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A powerful Vite plugin that automatically tags React components with source reference attributes, enabling features like 'Alt + Click' to open source files in your IDE.",
   "homepage": "https://vpcr.vercel.app",
   "changelog": "https://vpcr.vercel.app/changelog",
@@ -41,7 +41,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "vite": "^5.0.0 || ^6.0.0"
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
   },
   "dependencies": {
     "@babel/parser": "^7.23.0",

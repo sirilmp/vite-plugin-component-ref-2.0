@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 
+
+## [1.0.3] - 2026-02-15
+
+### Added
+
+- Added support for Vite `^7.0.0` in `peerDependencies`.
+
+## [1.0.0]
+
 ### Added
 - Initial release of `vpcr`.
 - Automatic JSX element tagging with `ref-id`, `ref-component`, `ref-line`, `ref-path`, and `ref-file`.
