@@ -56,22 +56,172 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
 
   const clientScript = `
     (function() {
-      const handleEvent = (e) => {
+      // Inject CSS
+      const style = document.createElement('style');
+      style.textContent = \`
+        .vpcr-overlay {
+          position: fixed;
+          pointer-events: none;
+          z-index: 999999;
+          border: 2px dashed #3b82f6;
+          background-color: rgba(59, 130, 246, 0.1);
+          border-radius: 4px;
+          transition: all 0.05s ease;
+          box-sizing: border-box;
+        }
+        .vpcr-tooltip {
+          position: fixed;
+          z-index: 999999;
+          background-color: #1e293b;
+          color: white;
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          pointer-events: none;
+          white-space: nowrap;
+          border: 1px solid #334155;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .vpcr-component-name {
+          font-weight: 600;
+          color: #60a5fa;
+        }
+        .vpcr-file-path {
+          opacity: 0.7;
+        }
+      \`;
+      document.head.appendChild(style);
+
+      let overlay = null;
+      let tooltip = null;
+      let lastTarget = null;
+      let isAltDown = false;
+
+      function createUI() {
+        if (!overlay) {
+          overlay = document.createElement('div');
+          overlay.className = 'vpcr-overlay';
+          document.body.appendChild(overlay);
+        }
+        if (!tooltip) {
+          tooltip = document.createElement('div');
+          tooltip.className = 'vpcr-tooltip';
+          document.body.appendChild(tooltip);
+        }
+      }
+
+      function removeUI() {
+        if (overlay) {
+          overlay.remove();
+          overlay = null;
+        }
+        if (tooltip) {
+          tooltip.remove();
+          tooltip = null;
+        }
+        lastTarget = null;
+      }
+
+      function updateUI(target) {
+        if (!target) return;
+        
+        createUI();
+        const rect = target.getBoundingClientRect();
+        const refId = target.getAttribute('${prefix}-id');
+        const componentName = target.getAttribute('${prefix}-component') || 'Component';
+        const [file, line] = refId.split(':');
+        const offset = 4;
+
+        // Update Overlay
+        overlay.style.top = (rect.top - offset) + 'px';
+        overlay.style.left = (rect.left - offset) + 'px';
+        overlay.style.width = (rect.width + offset * 2) + 'px';
+        overlay.style.height = (rect.height + offset * 2) + 'px';
+
+        // Update Tooltip
+        tooltip.innerHTML = \`<span class="vpcr-component-name">&lt;\${componentName}&gt;</span> <span class="vpcr-file-path">\${file}:\${line}</span>\`;
+        
+        const tooltipRect = tooltip.getBoundingClientRect();
+        let tooltipTop = rect.top - tooltipRect.height - 8;
+        let tooltipLeft = rect.left;
+
+        if (tooltipTop < 0) {
+          tooltipTop = rect.bottom + 8;
+        }
+        if (tooltipLeft + tooltipRect.width > window.innerWidth) {
+          tooltipLeft = window.innerWidth - tooltipRect.width - 8;
+        }
+
+        tooltip.style.top = tooltipTop + 'px';
+        tooltip.style.left = tooltipLeft + 'px';
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Alt') {
+          isAltDown = true;
+          // Trigger immediate update if mouse is already over something
+          // We can't easily get the element under cursor without mousemove, 
+          // but next mousemove will catch it. 
+          // However, to make it instant, we can track mouse pos if needed, 
+          // but for simplicity, let's wait for mousemove or just toggle state.
+        }
+      }, true);
+
+      window.addEventListener('keyup', (e) => {
+        if (e.key === 'Alt') {
+          isAltDown = false;
+          removeUI();
+        }
+      }, true);
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isAltDown) return;
+        
+        const target = e.target.closest('[${prefix}-id]');
+        if (target && target !== lastTarget) {
+          lastTarget = target;
+          updateUI(target);
+        } else if (!target) {
+          removeUI();
+        }
+      }, true);
+
+      // Handle Scroll to update position
+      window.addEventListener('scroll', () => {
+        if (isAltDown && lastTarget) {
+          updateUI(lastTarget);
+        }
+      }, true);
+
+      // Click Handler
+      const handleClick = (e) => {
         if (e.altKey) {
           const taggedElement = e.target.closest('[${prefix}-id]');
           if (taggedElement) {
             e.preventDefault();
             e.stopImmediatePropagation();
-            if (e.type === 'mousedown') {
-              const refId = taggedElement.getAttribute('${prefix}-id');
-              const [file, line] = refId.split(':');
-              fetch('/__open-in-editor?file=' + encodeURIComponent(file) + '&line=' + line);
+            
+            const refId = taggedElement.getAttribute('${prefix}-id');
+            const [file, line] = refId.split(':');
+            fetch('/__open-in-editor?file=' + encodeURIComponent(file) + '&line=' + line);
+            
+            // Visual feedback
+            if (overlay) {
+              overlay.style.backgroundColor = 'rgba(59, 130, 246, 0.4)';
+              setTimeout(() => {
+                if (overlay) overlay.style.backgroundColor = 'rgba(59, 130, 246, 0.15)';
+              }, 150);
             }
           }
         }
       };
-      window.addEventListener('mousedown', handleEvent, true);
-      window.addEventListener('click', handleEvent, true);
+      
+      window.addEventListener('mousedown', handleClick, true);
+      window.addEventListener('click', handleClick, true);
     })();
   `;
 

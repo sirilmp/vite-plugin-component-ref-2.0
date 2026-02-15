@@ -4,7 +4,18 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [1.0.4] - 2026-02-15
+
+
+### Added
+
+- **Visual Feedback**: When the modifier key (e.g., Alt/Option) is held down:
+  - Draw a **highlight box** around the component under the cursor.
+  - Show a **tooltip** with the component name (e.g., `<Button>`), file path (`src/components/Button.tsx`) and line number (`10`).
+
+
 ## [1.0.3] - 2026-02-15
+
 
 ### Added
 
