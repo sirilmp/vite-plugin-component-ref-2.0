@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [1.0.8] - 2026-02-19
+
+### Added
+- Added `enableHighlighter` option to `PluginOptions` (default: `true`).
+- Improved tooltip to show component name even if not explicitly added to attributes.
+
 ## [1.0.7] - 2026-02-17
 
 ### Fixed

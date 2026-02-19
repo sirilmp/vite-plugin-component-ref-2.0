@@ -11,8 +11,8 @@ describe('componentRefTagger editor logic', () => {
         expect(plugin.name).toBe('vite-component-ref-tagger');
     });
 
-    it('should respect COMPONENT_REF_EDITOR environment variable', () => {
-        process.env.COMPONENT_REF_EDITOR = 'my-custom-editor';
+    it('should respect VPCR_EDITOR environment variable', () => {
+        process.env.VPCR_EDITOR = 'my-custom-editor';
         plugin = componentRefTagger({ editor: 'original-editor' });
         
         const mockConfig = { mode: 'dev', root: '/' };
@@ -21,6 +21,6 @@ describe('componentRefTagger editor logic', () => {
             plugin.configResolved(mockConfig as any);
         }
         
-        expect(process.env.COMPONENT_REF_EDITOR).toBe('my-custom-editor');
+        expect(process.env.VPCR_EDITOR).toBe('my-custom-editor');
     });
 });

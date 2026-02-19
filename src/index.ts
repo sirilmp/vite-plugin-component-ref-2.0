@@ -20,6 +20,7 @@ export interface PluginOptions {
   shouldTag?: (componentName: string, filePath: string) => boolean;
   editor?: string;
   openInEditor?: (filePath: string, line: number) => void;
+  enableHighlighter?: boolean;
 }
 
 const defaultOptions: Required<PluginOptions> = {
@@ -32,6 +33,7 @@ const defaultOptions: Required<PluginOptions> = {
   shouldTag: () => true,
   editor: "code",
   openInEditor: () => {},
+  enableHighlighter: true,
 };
 
 function matches(id: string, pattern: string | RegExp | (string | RegExp)[]): boolean {
@@ -46,7 +48,7 @@ function matches(id: string, pattern: string | RegExp | (string | RegExp)[]): bo
 
 export function vpcrTagger(options: PluginOptions = {}): Plugin {
   const opts = { ...defaultOptions, ...options };
-  const { prefix, attributes, basePath, include, exclude, enabled, shouldTag, editor, openInEditor } = opts;
+  const { prefix, attributes, basePath, include, exclude, enabled, shouldTag, editor, openInEditor, enableHighlighter } = opts;
 
   let config: ResolvedConfig;
 
@@ -56,6 +58,7 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
 
   const clientScript = `
     (function() {
+      const enableHighlighter = ${enableHighlighter};
       // Inject CSS
       const style = document.createElement('style');
       style.textContent = \`
@@ -102,6 +105,7 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
       let isAltDown = false;
 
       function createUI() {
+        if (!enableHighlighter) return;
         if (!overlay) {
           overlay = document.createElement('div');
           overlay.className = 'vpcr-overlay';
@@ -127,13 +131,18 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
       }
 
       function updateUI(target) {
-        if (!target) return;
+        if (!target || !enableHighlighter) return;
         
         createUI();
         const rect = target.getBoundingClientRect();
         const refId = target.getAttribute('${prefix}-id');
-        const componentName = target.getAttribute('${prefix}-component') || 'Component';
-        const [file, line] = refId.split(':');
+        let componentName = target.getAttribute('${prefix}-component');
+        const [file, line, comp] = refId.split(':');
+        
+        if (!componentName && comp) {
+          componentName = comp;
+        }
+        componentName = componentName || 'Component';
         const offset = 4;
 
         // Update Overlay
@@ -245,8 +254,8 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
     configResolved(resolvedConfig) {
       config = resolvedConfig;
       const env = loadEnv(config.mode, config.root, "");
-      if (env.COMPONENT_REF_EDITOR) {
-        process.env.COMPONENT_REF_EDITOR = env.COMPONENT_REF_EDITOR;
+      if (env.VPCR_EDITOR) {
+        process.env.VPCR_EDITOR = env.VPCR_EDITOR;
       }
     },
 
@@ -265,7 +274,7 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
                 options.openInEditor(absolutePath, lineNum);
               } else {
                 // Priority: 1. Env Var, 2. Options, 3. Default
-                const targetEditor = process.env.COMPONENT_REF_EDITOR || editor;
+                const targetEditor = process.env.VPCR_EDITOR || editor;
                 let cmdTemplate = targetEditor;
 
                 // Smart defaults for known editors
@@ -376,7 +385,7 @@ export function vpcrTagger(options: PluginOptions = {}): Plugin {
           if (jsxPath.node.attributes.some((attr: any) => t.isJSXAttribute(attr) && attr.name.name === idAttrName)) return;
 
           const attrsToAdd: any[] = [];
-          if (attributes.includes("id")) attrsToAdd.push(jsxAttr(`${prefix}-id`, `${relPath}:${line}`));
+          if (attributes.includes("id")) attrsToAdd.push(jsxAttr(`${prefix}-id`, `${relPath}:${line}:${componentName}`));
           if (attributes.includes("name")) attrsToAdd.push(jsxAttr(`${prefix}-name`, jsxPath.node.name.name || "unknown"));
           if (attributes.includes("path")) attrsToAdd.push(jsxAttr(`${prefix}-path`, relPath));
           if (attributes.includes("line")) attrsToAdd.push(jsxAttr(`${prefix}-line`, String(line)));
