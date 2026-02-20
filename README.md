@@ -70,7 +70,7 @@ Developers can override the project-wide editor setting by adding a variable to 
 
 ```bash
 # .env.local or .env
-COMPONENT_REF_EDITOR=cursor
+VPCR_EDITOR=cursor
 ```
 
 The plugin will automatically detect it's Cursor and use the correct positioning flags!
